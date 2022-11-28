@@ -211,8 +211,6 @@ int main()
 { 
      
     srand((unsigned)time(0)); 
-  
-     
     SkipList lst(3, 0.5); 
   
    cout<<"Insertion"<<endl;
