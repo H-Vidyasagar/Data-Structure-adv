@@ -1,113 +1,128 @@
-#include<iostream>
-#include<cstdlib>
-#include<string>
-#include<cstdio>
-using namespace std;
-const int T_S = 200;
-class HashTableEntry {
-   public:
-      int k;
-      int v;
-      HashTableEntry(int k, int v) {
-         this->k= k;
-         this->v = v;
-      }
-};
-class HashMapTable {
-   private:
-      HashTableEntry **t;
-   public:
-      HashMapTable() {
-         t = new HashTableEntry * [T_S];
-         for (int i = 0; i< T_S; i++) {
-            t[i] = NULL;
-         }
-      }
-      int HashFunc(int k) {
-         return k % T_S;
-      }
-      void Insert(int k, int v) {
-         int h = HashFunc(k);
-         while (t[h] != NULL && t[h]->k != k) {
-            h = HashFunc(h + 1);
-         }
-         if (t[h] != NULL)
-            delete t[h];
-         t[h] = new HashTableEntry(k, v);
-      }
-      int SearchKey(int k) {
-         int h = HashFunc(k);
-         while (t[h] != NULL && t[h]->k != k) {
-            h = HashFunc(h + 1);
-         }
-         if (t[h] == NULL)
-            return -1;
-         else
-            return t[h]->v;
-      }
-      void Remove(int k) {
-         int h = HashFunc(k);
-         while (t[h] != NULL) {
-            if (t[h]->k == k)
-               break;
-            h = HashFunc(h + 1);
-         }
-         if (t[h] == NULL) {
-            cout<<"No Element found at key "<<k<<endl;
-            return;
-         } else {
-            delete t[h];
-         }
-         cout<<"Element Deleted"<<endl;
-      }
-      ~HashMapTable() {
-         for (int i = 0; i < T_S; i++) {
-            if (t[i] != NULL)
-               delete t[i];
-               delete[] t;
-         }
-      }
-};
-int main() {
-   HashMapTable hash;
-   int k, v;
-   int c;
-   while (1) {
-      cout<<"1.Insert element into the table"<<endl;
-      cout<<"2.Search element from the key"<<endl;
-      cout<<"3.Delete element at a key"<<endl;
-      cout<<"4.Exit"<<endl;
-      cout<<"Enter your choice: ";
-      cin>>c;
-      switch(c) {
-         case 1:
-            cout<<"Enter element to be inserted: ";
-            cin>>v;
-            cout<<"Enter key at which element to be inserted: ";
-            cin>>k;
-            hash.Insert(k, v);
-         break;
-         case 2:
-            cout<<"Enter key of the element to be searched: ";
-            cin>>k;
-            if (hash.SearchKey(k) == -1) {
-               cout<<"No element found at key "<<k<<endl;
-               continue;
-            } else {
-               cout<<"Element at key "<<k<<" : ";
-               cout<<hash.SearchKey(k)<<endl;
-            }
-         break;
-         case 3:
-            cout<<"Enter key of the element to be deleted: ";
-            cin>>k;
-            hash.Remove(k);
-         break;
-         case 4:
-            exit(1);
-         default:
-            cout<<"\nEnter correct option\n";
-      }
-   }
-   return 0;
+#include<stdio.h>
+#include<limits.h>
+
+/*
+This is code for linear probing in open addressing. If you want to do quadratic probing and double hashing which are also
+open addressing methods in this code when I used hash function that (pos+1)%hFn in that place just replace with another function.
+*/
+
+void insert(int ary[],int hFn, int size){
+    int element,pos,n=0;
+
+printf("Enter key element to insert\n");
+scanf("%d",&element);
+
+pos = element%hFn;
+
+while(ary[pos]!= INT_MIN) {  // INT_MIN and INT_MAX indicates that cell is empty. So if cell is empty loop will break and goto bottom of the loop to insert element
+if(ary[pos]== INT_MAX)
+            break;
+pos = (pos+1)%hFn;
+n++;
+if(n==size)
+break;      // If table is full we should break, if not check this, loop will go to infinite loop.
+}
+
+if(n==size)
+        printf("Hash table was full of elements\nNo Place to insert this element\n\n");
+else
+        ary[pos] = element;    //Inserting element
+}
+
+void deletet(int ary[],int hFn,int size){
+/*
+very careful observation required while deleting. To understand code of this delete function see the note at end of the program
+*/
+int element,n=0,pos;
+
+printf("Enter element to delete\n");
+scanf("%d",&element);
+
+pos = element%hFn;
+
+while(n++ != size){
+if(ary[pos]==INT_MIN){
+printf("Element not found in hash table\n");
+break;
+}
+else if(ary[pos]==element){
+ary[pos]=INT_MAX;
+printf("Element deleted\n\n");
+break;
+}
+else{
+pos = (pos+1) % hFn;
+}
+}
+if(--n==size)
+        printf("Element not found in hash table\n");
+}
+
+void search(int ary[],int hFn,int size){
+int element,pos,n=0;
+
+printf("Enter element you want to search\n");
+scanf("%d",&element);
+
+pos = element%hFn;
+
+while(n++ != size){
+if(ary[pos]==element){
+printf("Element found at index %d\n",pos);
+break;
+}
+else
+            if(ary[pos]==INT_MAX ||ary[pos]!=INT_MIN)
+                pos = (pos+1) %hFn;
+}
+if(--n==size) printf("Element not found in hash table\n");
+}
+
+void display(int ary[],int size){
+int i;
+
+printf("Index\tValue\n");
+
+for(i=0;i<size;i++)
+        printf("%d\t%d\n",i,ary[i]);
+}
+int main(){
+int size,hFn,i,choice;
+
+printf("Enter size of hash table\n");
+scanf("%d",&size);
+
+int ary[size];
+
+printf("Enter hash function [if mod 10 enter 10]\n");
+scanf("%d",&hFn);
+
+for(i=0;i<size;i++)
+        ary[i]=INT_MIN; //Assigning INT_MIN indicates that cell is empty
+
+do{
+printf("Enter your choice\n");
+printf(" 1-> Insert\n 2-> Delete \n3->Searching\n 0-> Exit\n");
+scanf("%d",&choice);
+
+switch(choice){
+case 1:
+insert(ary,hFn,size);
+break;
+case 2:
+deletet(ary,hFn,size);
+break;
+//case 3:
+//display(ary,size);
+//break;
+case 3:
+search(ary,hFn,size);
+break;
+default:
+printf("Enter correct choice\n");
+break;
+}
+}while(choice);
+
+return 0;
 }
