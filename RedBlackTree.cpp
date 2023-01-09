@@ -42,7 +42,8 @@ void inorderHelper(Node *root)
         return;
 
     inorderHelper(root->left);
-    cout << root->data << "  ";
+    cout << root->data <<" ";
+    cout << root->color << "  \n";
     inorderHelper(root->right);
 }
 
@@ -82,6 +83,7 @@ void levelOrderHelper(Node *root)
     {
         Node *temp = q.front();
         cout << temp->data << "  ";
+        cout << temp->color<< " \n ";
         q.pop();
 
         if (temp->left != NULL)
